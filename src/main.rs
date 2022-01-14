@@ -1,21 +1,15 @@
-use clap::{Parser, Subcommand};
+mod cli;
+mod error;
 
-#[derive(Parser, Debug)]
-#[clap(name = "pvner")]
-struct Cli {
-    #[clap(subcommand)]
-    command: Command,
-}
-
-#[derive(Subcommand, Debug)]
-enum Command {
-    Apply { file: String },
-}
+use cli::run_command;
 
 fn main() {
-    let cli = Cli::parse();
+    match run_command() {
+        Ok(()) => {}
+        Err(e) => {
+            eprintln!("{}", e);
 
-    match &cli.command {
-        Command::Apply { file } => {}
+            std::process::exit(1);
+        }
     }
 }
