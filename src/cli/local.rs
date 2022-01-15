@@ -1,3 +1,4 @@
+use crate::builtins;
 use crate::error::Result;
 
 pub struct Local {
@@ -10,6 +11,8 @@ impl Local {
     }
 
     pub fn run(&self) -> Result<()> {
+        builtins::git::Git::new(self.filepath.clone()).apply()?;
+
         Ok(())
     }
 }
