@@ -1,11 +1,11 @@
 use crate::builtins;
 use crate::error::Result;
 
-pub struct Local {
+pub struct Apply {
     filepath: String,
 }
 
-impl Local {
+impl Apply {
     pub fn new(filepath: String) -> Self {
         Self { filepath }
     }
