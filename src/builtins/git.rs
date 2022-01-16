@@ -1,8 +1,11 @@
+use crate::action::Action;
 use crate::error::{Error, Result};
 
+use serde::Deserialize;
 use std::path::Path;
 use std::process;
 
+#[derive(Debug, Deserialize)]
 pub struct Git {
     dest: String,
     repository: String,
@@ -11,12 +14,20 @@ pub struct Git {
     branch: Option<String>,
 }
 
+impl Action for Git {
+    fn apply(&self) -> Result<()> {
+        let dest_path = std::path::Path::new(self.dest.as_str());
+        if !dest_path.exists() {
+            self.git_clone()?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Git {
-    pub fn new<T>(dest: T) -> Self
-    where
-        T: Into<String>,
-    {
-        let dest = dest.into();
+    pub fn new() -> Self {
+        let dest = "./test".to_string();
         let repository = "git@github.com:ytakhs/pvner.git".to_string();
         let recursive = false;
         let depth = None;
@@ -29,15 +40,6 @@ impl Git {
             branch,
             depth,
         }
-    }
-
-    pub fn apply(&self) -> Result<()> {
-        let dest_path = std::path::Path::new(self.dest.as_str());
-        if !dest_path.exists() {
-            self.git_clone()?;
-        }
-
-        Ok(())
     }
 
     fn git_clone(&self) -> Result<()> {
@@ -57,7 +59,13 @@ impl Git {
         command.arg(self.repository.as_str());
         command.arg(self.dest.as_str());
 
-        command.output().or(Err(Error::CommandError))?;
+        let output = command.output().or(Err(Error::CommandError))?;
+        if !output.status.success() {
+            let err = std::str::from_utf8(&output.stderr).or(Err(Error::CommandError))?;
+            eprintln!("{}", err);
+
+            return Err(Error::CommandError);
+        }
 
         Ok(())
     }

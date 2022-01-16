@@ -1,3 +1,4 @@
+use crate::action::Action;
 use crate::builtins;
 use crate::error::Result;
 
@@ -11,7 +12,7 @@ impl Apply {
     }
 
     pub fn run(&self) -> Result<()> {
-        builtins::git::Git::new(self.filepath.clone()).apply()?;
+        builtins::git::Git::new().apply()?;
 
         Ok(())
     }
