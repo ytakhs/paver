@@ -15,7 +15,7 @@ pub struct Git {
 }
 
 impl Action for Git {
-    fn apply(&self) -> Result<()> {
+    fn run(&self) -> Result<()> {
         let dest_path = std::path::Path::new(self.dest.as_str());
         if !dest_path.exists() {
             self.git_clone()?;

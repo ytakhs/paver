@@ -12,7 +12,7 @@ impl Apply {
     }
 
     pub fn run(&self) -> Result<()> {
-        builtins::git::Git::new().apply()?;
+        builtins::git::Git::new().run()?;
 
         Ok(())
     }
