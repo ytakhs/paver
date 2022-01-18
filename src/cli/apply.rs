@@ -1,4 +1,4 @@
-use crate::action::Action;
+use crate::action::ActionStorage;
 use crate::builtins;
 use crate::error::Result;
 
@@ -12,7 +12,14 @@ impl Apply {
     }
 
     pub fn run(&self) -> Result<()> {
-        builtins::git::Git::new().run()?;
+        let mut action_storage = ActionStorage::new();
+        let key = "git".to_string();
+
+        action_storage.store(key.clone(), Box::new(builtins::git::Git::new()));
+
+        if let Some(g) = action_storage.fetch(&key) {
+            g.run()?;
+        }
 
         Ok(())
     }
