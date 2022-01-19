@@ -1,4 +1,0 @@
-[[git]]
-dest = "./test"
-recursive = false
-repository = "git@github.com:ytakhs/pvner.git"
