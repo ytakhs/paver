@@ -1,17 +1,38 @@
-use crate::action::Action;
+use crate::action::{Action, ActionBuilder};
 use crate::error::{Error, Result};
 
 use serde::Deserialize;
 use std::path::Path;
 use std::process;
 
-#[derive(Debug, Deserialize)]
 pub struct Git {
     dest: String,
     repository: String,
     recursive: bool,
     depth: Option<usize>,
     branch: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GitOptions {
+    dest: String,
+    repository: String,
+    recursive: Option<bool>,
+    depth: Option<usize>,
+    branch: Option<String>,
+}
+
+pub struct GitBuilder {}
+
+impl ActionBuilder for GitBuilder {
+    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>> {
+        let options: GitOptions =
+            serde_yaml::from_value(raw_options).or(Err(Error::CommandError))?;
+
+        let git = Git::new(options);
+
+        Ok(Box::new(git))
+    }
 }
 
 impl Action for Git {
@@ -26,12 +47,12 @@ impl Action for Git {
 }
 
 impl Git {
-    pub fn new() -> Self {
-        let dest = "./test".to_string();
-        let repository = "git@github.com:ytakhs/pvner.git".to_string();
-        let recursive = false;
-        let depth = None;
-        let branch = Some("HEAD".to_string());
+    pub fn new(options: GitOptions) -> Self {
+        let dest = options.dest;
+        let repository = options.repository;
+        let recursive = options.recursive.unwrap_or(false);
+        let depth = options.depth;
+        let branch = options.branch;
 
         Self {
             dest,

@@ -6,22 +6,26 @@ pub trait Action {
     fn run(&self) -> Result<()>;
 }
 
-pub struct ActionStorage {
-    storage: HashMap<String, Box<dyn Action>>,
+pub trait ActionBuilder {
+    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>>;
 }
 
-impl ActionStorage {
+pub struct Storage {
+    storage: HashMap<String, Box<dyn ActionBuilder>>,
+}
+
+impl Storage {
     pub fn new() -> Self {
         let storage = HashMap::new();
 
         Self { storage }
     }
 
-    pub fn store(&mut self, key: String, action: Box<dyn Action>) {
+    pub fn store(&mut self, key: String, action: Box<dyn ActionBuilder>) {
         self.storage.insert(key, action);
     }
 
-    pub fn fetch(&self, key: &String) -> Option<&Box<dyn Action>> {
+    pub fn fetch(&self, key: &String) -> Option<&Box<dyn ActionBuilder>> {
         self.storage.get(key)
     }
 }

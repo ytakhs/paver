@@ -1,3 +1,7 @@
 tasks:
   - action: git
-    options: {}
+    options:
+      dest: ./test
+      repository: git@github.com:ytakhs/pvner.git
+      recursive: false
+      branch: main
