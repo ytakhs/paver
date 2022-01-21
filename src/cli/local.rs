@@ -12,11 +12,11 @@ struct Task {
     options: Value,
 }
 
-pub struct Apply {
+pub struct Local {
     filepath: String,
 }
 
-impl Apply {
+impl Local {
     pub fn new(filepath: String) -> Self {
         Self { filepath }
     }

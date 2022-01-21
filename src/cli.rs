@@ -1,4 +1,4 @@
-mod apply;
+mod local;
 
 use crate::error::Result;
 
@@ -13,13 +13,13 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum SubCommand {
-    Apply { filepath: String },
+    Local { filepath: String },
 }
 
 pub fn run_command() -> Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        SubCommand::Apply { filepath } => apply::Apply::new(filepath.clone()).run(),
+        SubCommand::Local { filepath } => local::Local::new(filepath.clone()).run(),
     }
 }
