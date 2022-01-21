@@ -37,8 +37,15 @@ impl ActionBuilder for GitBuilder {
 
 impl Action for Git {
     fn run(&self) -> Result<()> {
-        let dest_path = std::path::Path::new(self.dest.as_str());
-        if !dest_path.exists() {
+        let mut command = process::Command::new("ls");
+        command.args(["-A", self.dest.as_str()]);
+        let output = first_output(command.output().or(Err(Error::CommandError))?)?;
+
+        let mut command = process::Command::new("test");
+        command.args(["-z", output.as_str()]);
+        let result = command.output().or(Err(Error::CommandError))?;
+
+        if result.status.success() {
             self.git_clone()?;
         }
 
@@ -108,9 +115,12 @@ impl Git {
     }
 }
 
-fn first_output(output_str: &str) -> Result<String> {
-    output_str
-        .split("\n")
+fn first_output(output: process::Output) -> Result<String> {
+    let s = std::str::from_utf8(&output.stdout)
+        .or(Err(Error::CommandError))
+        .map(|s| s.to_string())?;
+
+    s.split("\n")
         .next()
         .ok_or(Error::CommandError)
         .map(|s| s.to_string())
