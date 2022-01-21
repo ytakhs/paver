@@ -23,13 +23,10 @@ impl Local {
 
     pub fn run(&self) -> Result<()> {
         let mut storage = Storage::new();
-        let key = "git".to_string();
+        storage.store("git".to_string(), Box::new(builtins::git::GitBuilder {}));
 
         let content =
             std::fs::read_to_string(self.filepath.as_str()).or(Err(Error::CommandError))?;
-
-        storage.store(key.clone(), Box::new(builtins::git::GitBuilder {}));
-
         let mut value: std::collections::HashMap<String, Value> =
             serde_yaml::from_str(content.as_str()).or(Err(Error::CommandError))?;
 
