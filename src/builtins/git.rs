@@ -44,13 +44,8 @@ where
     B: Backend,
 {
     fn run(&self, backend: B) -> Result<()> {
-        let mut command = process::Command::new("ls");
-        command.args(["-A", self.dest.as_str()]);
-        let output = first_output(command.output().or(Err(Error::CommandError))?)?;
-
-        let mut command = process::Command::new("test");
-        command.args(["-z", output.as_str()]);
-        let result = command.output().or(Err(Error::CommandError))?;
+        let output = backend.run_command("ls", &["-A"])?;
+        let result = backend.run_command("test", &["-z", output.stdout.as_str()])?;
 
         if result.status.success() {
             self.git_clone()?;
@@ -104,31 +99,4 @@ impl Git {
 
         Ok(())
     }
-
-    fn run_git_command_in_repo<I, S>(&self, args: I) -> Result<String>
-    where
-        I: IntoIterator<Item = S>,
-        S: AsRef<std::ffi::OsStr>,
-    {
-        let mut command = process::Command::new("git");
-        command.current_dir(&self.dest);
-        command.args(args);
-        let output = command.output().or(Err(Error::CommandError))?;
-        let result = std::str::from_utf8(&output.stdout)
-            .or(Err(Error::CommandError))
-            .map(|s| s.to_string())?;
-
-        Ok(result)
-    }
-}
-
-fn first_output(output: process::Output) -> Result<String> {
-    let s = std::str::from_utf8(&output.stdout)
-        .or(Err(Error::CommandError))
-        .map(|s| s.to_string())?;
-
-    s.split("\n")
-        .next()
-        .ok_or(Error::CommandError)
-        .map(|s| s.to_string())
 }
