@@ -1,4 +1,5 @@
 use crate::action::{Action, ActionBuilder};
+use crate::backend::Backend;
 use crate::error::{Error, Result};
 
 use serde::Deserialize;
@@ -24,8 +25,11 @@ pub struct GitOptions {
 
 pub struct GitBuilder {}
 
-impl ActionBuilder for GitBuilder {
-    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>> {
+impl<B> ActionBuilder<B> for GitBuilder
+where
+    B: Backend,
+{
+    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action<B>>> {
         let options: GitOptions =
             serde_yaml::from_value(raw_options).or(Err(Error::CommandError))?;
 
@@ -35,8 +39,11 @@ impl ActionBuilder for GitBuilder {
     }
 }
 
-impl Action for Git {
-    fn run(&self) -> Result<()> {
+impl<B> Action<B> for Git
+where
+    B: Backend,
+{
+    fn run(&self, backend: B) -> Result<()> {
         let mut command = process::Command::new("ls");
         command.args(["-A", self.dest.as_str()]);
         let output = first_output(command.output().or(Err(Error::CommandError))?)?;

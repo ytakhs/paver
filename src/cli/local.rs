@@ -1,4 +1,5 @@
 use crate::action::Storage;
+use crate::backend::local::LocalBackend;
 use crate::builtins;
 use crate::error::{Error, Result};
 
@@ -36,8 +37,9 @@ impl Local {
             for t in tasks {
                 if let Some(action_builder) = storage.fetch(&t.action_name) {
                     let action = action_builder.build(t.options)?;
+                    let backend = LocalBackend {};
 
-                    action.run()?;
+                    action.run(backend)?;
                 }
             }
         }
