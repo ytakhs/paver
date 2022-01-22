@@ -36,10 +36,10 @@ impl Local {
 
             for t in tasks {
                 if let Some(action_builder) = storage.fetch(&t.action_name) {
-                    let action = action_builder.build(t.options)?;
                     let backend = LocalBackend {};
+                    let action = action_builder.build(backend, t.options)?;
 
-                    action.run(backend)?;
+                    action.run()?;
                 }
             }
         }

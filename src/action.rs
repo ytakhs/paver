@@ -3,18 +3,15 @@ use crate::error::Result;
 
 use std::collections::HashMap;
 
-pub trait Action<B>
-where
-    B: Backend,
-{
-    fn run(&self, backend: B) -> Result<()>;
+pub trait Action {
+    fn run(&self) -> Result<()>;
 }
 
 pub trait ActionBuilder<B>
 where
     B: Backend,
 {
-    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action<B>>>;
+    fn build(&self, backend: B, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>>;
 }
 
 pub struct Storage<B>

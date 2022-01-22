@@ -6,7 +6,11 @@ use serde::Deserialize;
 use std::path::Path;
 use std::process;
 
-pub struct Git {
+pub struct Git<B>
+where
+    B: Backend,
+{
+    backend: B,
     dest: String,
     repository: String,
     recursive: bool,
@@ -27,25 +31,30 @@ pub struct GitBuilder {}
 
 impl<B> ActionBuilder<B> for GitBuilder
 where
-    B: Backend,
+    B: Backend + 'static,
 {
-    fn build(&self, raw_options: serde_yaml::Value) -> Result<Box<dyn Action<B>>> {
+    fn build(&self, backend: B, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>> {
         let options: GitOptions =
             serde_yaml::from_value(raw_options).or(Err(Error::CommandError))?;
 
-        let git = Git::new(options);
+        let git = Git::new(backend, options);
 
         Ok(Box::new(git))
     }
 }
 
-impl<B> Action<B> for Git
+impl<B> Action for Git<B>
 where
     B: Backend,
 {
-    fn run(&self, backend: B) -> Result<()> {
-        let output = backend.run_command("ls", &["-A"])?;
-        let result = backend.run_command("test", &["-z", output.stdout.as_str()])?;
+    fn run(&self) -> Result<()> {
+        let output = self
+            .backend
+            .run_command("ls", &["-A", self.dest.as_str()])?;
+
+        let result = self
+            .backend
+            .run_command("test", &["-z", output.stdout.as_str()])?;
 
         if result.status.success() {
             self.git_clone()?;
@@ -55,8 +64,11 @@ where
     }
 }
 
-impl Git {
-    pub fn new(options: GitOptions) -> Self {
+impl<B> Git<B>
+where
+    B: Backend,
+{
+    pub fn new(backend: B, options: GitOptions) -> Self {
         let dest = options.dest;
         let repository = options.repository;
         let recursive = options.recursive.unwrap_or(false);
@@ -64,6 +76,7 @@ impl Git {
         let branch = options.branch;
 
         Self {
+            backend,
             dest,
             repository,
             recursive,
