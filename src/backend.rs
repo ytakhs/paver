@@ -3,7 +3,10 @@ use crate::error::Result;
 use std::process::ExitStatus;
 
 pub trait Backend {
-    fn run_command(&self, cmd: &str, args: &[&str]) -> Result<BackendOutput>;
+    fn run_command<I, S>(&self, cmd: &str, args: I) -> Result<BackendOutput>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<std::ffi::OsStr>;
 }
 
 pub struct BackendOutput {

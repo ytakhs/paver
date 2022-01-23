@@ -48,13 +48,11 @@ where
     B: Backend,
 {
     fn run(&self) -> Result<()> {
-        let output = self
-            .backend
-            .run_command("ls", &["-A", self.dest.as_str()])?;
+        let output = self.backend.run_command("ls", ["-A", self.dest.as_str()])?;
 
         let result = self
             .backend
-            .run_command("test", &["-z", output.stdout.as_str()])?;
+            .run_command("test", ["-z", output.stdout.as_str()])?;
 
         if result.status.success() {
             self.git_clone()?;

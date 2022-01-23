@@ -5,7 +5,11 @@ use std::process::Command;
 pub struct LocalBackend;
 
 impl Backend for LocalBackend {
-    fn run_command(&self, cmd: &str, args: &[&str]) -> Result<BackendOutput> {
+    fn run_command<I, S>(&self, cmd: &str, args: I) -> Result<BackendOutput>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<std::ffi::OsStr>,
+    {
         let mut command = Command::new(cmd);
         command.args(args);
         let output = command.output().or(Err(Error::CommandError))?;
