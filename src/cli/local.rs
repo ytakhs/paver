@@ -5,6 +5,7 @@ use crate::error::{Error, Result};
 
 use serde::Deserialize;
 use serde_yaml::Value;
+use tera::{Context, Tera};
 
 #[derive(Deserialize, Debug)]
 struct Task {
@@ -26,8 +27,15 @@ impl Local {
         let mut storage = Storage::new();
         storage.store("git".to_string(), Box::new(builtins::git::GitBuilder {}));
 
-        let content =
-            std::fs::read_to_string(self.filepath.as_str()).or(Err(Error::CommandError))?;
+        let mut tera = Tera::default();
+        tera.add_template_file(self.filepath.as_str(), None)
+            .or(Err(Error::CommandError))?;
+
+        let content = tera
+            .render(self.filepath.as_str(), &Context::new())
+            .map_err(|e| dbg!(e))
+            .or(Err(Error::CommandError))?;
+
         let mut value: std::collections::HashMap<String, Value> =
             serde_yaml::from_str(content.as_str()).or(Err(Error::CommandError))?;
 

@@ -1,7 +1,7 @@
 tasks:
   - action: git
     options:
-      dest: ./test
+      dest: {{ get_env(name="HOME") }}/tmp/test
       repository: git@github.com:ytakhs/pvner.git
       recursive: false
       branch: main
