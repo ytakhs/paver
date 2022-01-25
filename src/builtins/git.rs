@@ -3,7 +3,6 @@ use crate::backend::Backend;
 use crate::error::{Error, Result};
 
 use serde::Deserialize;
-use std::path::Path;
 use std::process;
 
 pub struct Git<B>
