@@ -10,6 +10,11 @@ use tera::{Context, Tera};
 
 #[derive(Deserialize, Debug)]
 struct Job {
+    steps: Vec<Step>,
+}
+
+#[derive(Deserialize, Debug)]
+struct Step {
     #[serde(rename(deserialize = "action"))]
     action_name: String,
     options: Value,
@@ -44,14 +49,16 @@ impl Local {
             let jobs: HashMap<String, Job> =
                 serde_yaml::from_value(val).or(Err(Error::CommandError))?;
 
-            for (name, t) in jobs {
+            for (name, job) in jobs {
                 dbg!(name);
 
-                if let Some(action_builder) = storage.fetch(&t.action_name) {
-                    let backend = LocalBackend {};
-                    let action = action_builder.build(backend, t.options)?;
+                for s in job.steps {
+                    if let Some(action_builder) = storage.fetch(&s.action_name) {
+                        let backend = LocalBackend {};
+                        let action = action_builder.build(backend, s.options)?;
 
-                    action.run()?;
+                        action.run()?;
+                    }
                 }
             }
         }
