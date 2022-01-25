@@ -1,5 +1,6 @@
-tasks:
-  - action: git
+jobs:
+  fetch_git:
+    action: git
     options:
       dest: {{ get_env(name="HOME") }}/tmp/test
       repository: git@github.com:ytakhs/pvner.git

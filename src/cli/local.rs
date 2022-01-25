@@ -5,10 +5,11 @@ use crate::error::{Error, Result};
 
 use serde::Deserialize;
 use serde_yaml::Value;
+use std::collections::HashMap;
 use tera::{Context, Tera};
 
 #[derive(Deserialize, Debug)]
-struct Task {
+struct Job {
     #[serde(rename(deserialize = "action"))]
     action_name: String,
     options: Value,
@@ -36,13 +37,16 @@ impl Local {
             .map_err(|e| dbg!(e))
             .or(Err(Error::CommandError))?;
 
-        let mut value: std::collections::HashMap<String, Value> =
+        let mut value: HashMap<String, Value> =
             serde_yaml::from_str(content.as_str()).or(Err(Error::CommandError))?;
 
-        if let Some(val) = value.remove("tasks") {
-            let tasks: Vec<Task> = serde_yaml::from_value(val).or(Err(Error::CommandError))?;
+        if let Some(val) = value.remove("jobs") {
+            let jobs: HashMap<String, Job> =
+                serde_yaml::from_value(val).or(Err(Error::CommandError))?;
 
-            for t in tasks {
+            for (name, t) in jobs {
+                dbg!(name);
+
                 if let Some(action_builder) = storage.fetch(&t.action_name) {
                     let backend = LocalBackend {};
                     let action = action_builder.build(backend, t.options)?;
