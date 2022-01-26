@@ -34,20 +34,13 @@ impl Local {
         storage.store("git".to_string(), Box::new(builtins::git::GitBuilder {}));
 
         let mut tera = Tera::default();
-        tera.add_template_file(self.filepath.as_str(), None)
-            .or(Err(Error::CommandError))?;
+        tera.add_template_file(self.filepath.as_str(), None)?;
 
-        let content = tera
-            .render(self.filepath.as_str(), &Context::new())
-            .map_err(|e| dbg!(e))
-            .or(Err(Error::CommandError))?;
-
-        let mut value: HashMap<String, Value> =
-            serde_yaml::from_str(content.as_str()).or(Err(Error::CommandError))?;
+        let content = tera.render(self.filepath.as_str(), &Context::new())?;
+        let mut value: HashMap<String, Value> = serde_yaml::from_str(content.as_str())?;
 
         if let Some(val) = value.remove("jobs") {
-            let jobs: HashMap<String, Job> =
-                serde_yaml::from_value(val).or(Err(Error::CommandError))?;
+            let jobs: HashMap<String, Job> = serde_yaml::from_value(val)?;
 
             for (name, job) in jobs {
                 dbg!(name);

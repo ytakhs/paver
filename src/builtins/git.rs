@@ -33,8 +33,7 @@ where
     B: Backend + 'static,
 {
     fn build(&self, backend: B, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>> {
-        let options: GitOptions =
-            serde_yaml::from_value(raw_options).or(Err(Error::CommandError))?;
+        let options: GitOptions = serde_yaml::from_value(raw_options)?;
 
         let git = Git::new(backend, options);
 
@@ -99,12 +98,12 @@ where
         command.arg(self.repository.as_str());
         command.arg(self.dest.as_str());
 
-        let output = command.output().or(Err(Error::CommandError))?;
+        let output = command.output()?;
         if !output.status.success() {
-            let err = std::str::from_utf8(&output.stderr).or(Err(Error::CommandError))?;
+            let err = std::str::from_utf8(&output.stderr)?;
             eprintln!("{}", err);
 
-            return Err(Error::CommandError);
+            return Err(Error::ActionError(err.to_string()));
         }
 
         Ok(())

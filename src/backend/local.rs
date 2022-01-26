@@ -12,15 +12,11 @@ impl Backend for LocalBackend {
     {
         let mut command = Command::new(cmd);
         command.args(args);
-        let output = command.output().or(Err(Error::CommandError))?;
+        let output = command.output()?;
 
-        let stdout = std::str::from_utf8(&output.stdout)
-            .or(Err(Error::CommandError))
-            .map(|s| s.to_string())?;
+        let stdout = std::str::from_utf8(&output.stdout).map(|s| s.to_string())?;
 
-        let stderr = std::str::from_utf8(&output.stderr)
-            .or(Err(Error::CommandError))
-            .map(|s| s.to_string())?;
+        let stderr = std::str::from_utf8(&output.stderr).map(|s| s.to_string())?;
 
         let status = output.status;
 
