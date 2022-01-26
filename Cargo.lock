@@ -377,6 +377,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "paver"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "serde",
+ "serde_yaml",
+ "tera",
+ "thiserror",
+]
+
+[[package]]
 name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -501,17 +512,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7342d5883fbccae1cc37a2353b09c87c9b0f3afd73f5fb9bba687a1f733b029"
 dependencies = [
  "unicode-xid",
-]
-
-[[package]]
-name = "pvner"
-version = "0.1.0"
-dependencies = [
- "clap",
- "serde",
- "serde_yaml",
- "tera",
- "thiserror",
 ]
 
 [[package]]
