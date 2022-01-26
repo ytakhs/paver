@@ -28,5 +28,3 @@ pub enum Error {
         source: std::str::Utf8Error,
     },
 }
-
-pub type Result<T> = std::result::Result<T, Error>;

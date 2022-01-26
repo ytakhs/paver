@@ -1,5 +1,5 @@
 use crate::backend::Backend;
-use crate::error::Result;
+use crate::Result;
 
 use std::collections::HashMap;
 

@@ -1,6 +1,7 @@
 use crate::action::{Action, ActionBuilder};
 use crate::backend::Backend;
-use crate::error::{Error, Result};
+use crate::error::Error;
+use crate::Result;
 
 use serde::Deserialize;
 use std::process;

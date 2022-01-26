@@ -1,6 +1,6 @@
 mod local;
 
-use crate::error::Result;
+use crate::Result;
 
 use clap::{Parser, Subcommand};
 

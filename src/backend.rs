@@ -1,5 +1,5 @@
 pub mod local;
-use crate::error::Result;
+use crate::Result;
 use std::process::ExitStatus;
 
 pub trait Backend {

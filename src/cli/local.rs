@@ -1,7 +1,7 @@
 use crate::action::Storage;
 use crate::backend::local::LocalBackend;
 use crate::builtins;
-use crate::error::{Error, Result};
+use crate::Result;
 
 use serde::Deserialize;
 use serde_yaml::Value;

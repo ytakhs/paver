@@ -1,5 +1,5 @@
 use super::{Backend, BackendOutput};
-use crate::error::{Error, Result};
+use crate::Result;
 use std::process::Command;
 
 pub struct LocalBackend;
