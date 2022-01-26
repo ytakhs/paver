@@ -10,8 +10,8 @@ pub enum Error {
         #[from]
         source: tera::Error,
     },
-    #[error("YAML error: #{source}")]
-    YamlError {
+    #[error("YAML parse error: #{source}")]
+    YamlParseError {
         #[from]
         source: serde_yaml::Error,
     },

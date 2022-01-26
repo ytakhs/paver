@@ -1,6 +1,7 @@
 use crate::action::Storage;
 use crate::backend::local::LocalBackend;
 use crate::builtins;
+use crate::error::Error;
 use crate::Result;
 
 use serde::Deserialize;
@@ -10,14 +11,7 @@ use tera::{Context, Tera};
 
 #[derive(Deserialize, Debug)]
 struct Job {
-    steps: Vec<Step>,
-}
-
-#[derive(Deserialize, Debug)]
-struct Step {
-    #[serde(rename(deserialize = "action"))]
-    action_name: String,
-    options: Value,
+    steps: Vec<HashMap<String, Value>>,
 }
 
 pub struct Local {
@@ -45,10 +39,15 @@ impl Local {
             for (name, job) in jobs {
                 dbg!(name);
 
-                for s in job.steps {
-                    if let Some(action_builder) = storage.fetch(&s.action_name) {
+                for step in job.steps {
+                    let s = step
+                        .into_iter()
+                        .next()
+                        .ok_or(Error::ActionError("step error".to_string()))?;
+
+                    if let Some(action_builder) = storage.fetch(&s.0) {
                         let backend = LocalBackend {};
-                        let action = action_builder.build(backend, s.options)?;
+                        let action = action_builder.build(backend, s.1)?;
 
                         action.run()?;
                     }

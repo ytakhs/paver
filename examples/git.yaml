@@ -1,8 +1,7 @@
 jobs:
   fetch_git:
     steps:
-      - action: git
-        options:
+      - git:
           dest: {{ get_env(name="HOME") }}/tmp/test
           repository: git@github.com:ytakhs/pvner.git
           recursive: false
