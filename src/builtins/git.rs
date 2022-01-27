@@ -11,11 +11,7 @@ where
     B: Backend,
 {
     backend: B,
-    dest: String,
-    repository: String,
-    recursive: bool,
-    depth: Option<usize>,
-    branch: Option<String>,
+    options: GitOptions,
 }
 
 #[derive(Debug, Deserialize)]
@@ -49,7 +45,9 @@ where
     fn run(&self) -> Result<()> {
         self.backend.check_commands_available(&["git"])?;
 
-        let output = self.backend.run_command("ls", ["-A", self.dest.as_str()])?;
+        let output = self
+            .backend
+            .run_command("ls", ["-A", self.options.dest.as_str()])?;
 
         let result = self
             .backend
@@ -68,43 +66,29 @@ where
     B: Backend,
 {
     pub fn new(backend: B, options: GitOptions) -> Self {
-        let dest = options.dest;
-        let repository = options.repository;
-        let recursive = options.recursive.unwrap_or(false);
-        let depth = options.depth;
-        let branch = options.branch;
-
-        Self {
-            backend,
-            dest,
-            repository,
-            recursive,
-            branch,
-            depth,
-        }
+        Self { backend, options }
     }
 
     fn git_clone(&self) -> Result<()> {
         let mut command = process::Command::new("git");
         command.arg("clone");
 
-        if self.recursive {
+        if self.options.recursive.unwrap_or(false) {
             command.arg("--recursive");
         }
-        if let Some(d) = &self.depth {
+        if let Some(d) = &self.options.depth {
             command.args(["--depth", d.to_string().as_str()]);
         }
-        if let Some(b) = &self.branch {
+        if let Some(b) = &self.options.branch {
             command.args(["--branch", b.to_string().as_str()]);
         }
 
-        command.arg(self.repository.as_str());
-        command.arg(self.dest.as_str());
+        command.arg(self.options.repository.as_str());
+        command.arg(self.options.dest.as_str());
 
         let output = command.output()?;
         if !output.status.success() {
             let err = std::str::from_utf8(&output.stderr)?;
-            eprintln!("{}", err);
 
             return Err(Error::ActionError(err.to_string()));
         }
