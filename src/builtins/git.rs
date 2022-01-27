@@ -4,7 +4,6 @@ use crate::error::Error;
 use crate::Result;
 
 use serde::Deserialize;
-use std::process;
 
 pub struct Git<B>
 where
@@ -70,27 +69,24 @@ where
     }
 
     fn git_clone(&self) -> Result<()> {
-        let mut command = process::Command::new("git");
-        command.arg("clone");
+        let mut args = vec!["clone"];
 
         if self.options.recursive.unwrap_or(false) {
-            command.arg("--recursive");
+            args.push("--recursive");
         }
         if let Some(d) = &self.options.depth {
-            command.args(["--depth", d.to_string().as_str()]);
+            args.append(vec!["--depth", d.to_string().as_str()]);
         }
         if let Some(b) = &self.options.branch {
-            command.args(["--branch", b.to_string().as_str()]);
+            args.append(vec!["--branch", b.to_string().as_str()]);
         }
 
-        command.arg(self.options.repository.as_str());
-        command.arg(self.options.dest.as_str());
+        args.push(self.options.repository.as_str());
+        args.push(self.options.dest.as_str());
 
-        let output = command.output()?;
+        let output = self.backend.run_command("git", args)?;
         if !output.status.success() {
-            let err = std::str::from_utf8(&output.stderr)?;
-
-            return Err(Error::ActionError(err.to_string()));
+            return Err(Error::ActionError(output.stderr));
         }
 
         Ok(())
