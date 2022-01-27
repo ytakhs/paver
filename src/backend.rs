@@ -7,6 +7,14 @@ pub trait Backend {
     where
         I: IntoIterator<Item = S>,
         S: AsRef<std::ffi::OsStr>;
+
+    fn check_commands_available(&self, cmds: &[&str]) -> Result<()> {
+        for cmd in cmds {
+            self.run_command("which", [cmd])?;
+        }
+
+        Ok(())
+    }
 }
 
 pub struct BackendOutput {

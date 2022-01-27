@@ -47,6 +47,8 @@ where
     B: Backend,
 {
     fn run(&self) -> Result<()> {
+        self.backend.check_commands_available(&["git"])?;
+
         let output = self.backend.run_command("ls", ["-A", self.dest.as_str()])?;
 
         let result = self
