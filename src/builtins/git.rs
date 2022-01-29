@@ -1,15 +1,11 @@
-use crate::action::{Action, ActionBuilder};
+use crate::action::Action;
 use crate::backend::Backend;
 use crate::error::Error;
 use crate::Result;
 
 use serde::Deserialize;
 
-pub struct Git<B>
-where
-    B: Backend,
-{
-    backend: B,
+pub struct Git {
     options: GitOptions,
 }
 
@@ -22,53 +18,29 @@ pub struct GitOptions {
     branch: Option<String>,
 }
 
-pub struct GitBuilder {}
+impl Action for Git {
+    type Options = GitOptions;
 
-impl<B> ActionBuilder<B> for GitBuilder
-where
-    B: Backend + 'static,
-{
-    fn build(&self, backend: B, raw_options: serde_yaml::Value) -> Result<Box<dyn Action>> {
-        let options: GitOptions = serde_yaml::from_value(raw_options)?;
-
-        let git = Git::new(backend, options);
-
-        Ok(Box::new(git))
+    fn new(options: GitOptions) -> Self {
+        Self { options }
     }
-}
 
-impl<B> Action for Git<B>
-where
-    B: Backend,
-{
-    fn run(&self) -> Result<()> {
-        self.backend.check_commands_available(&["git"])?;
+    fn run(&self, backend: impl Backend) -> Result<()> {
+        backend.check_commands_available(&["git"])?;
 
-        let output = self
-            .backend
-            .run_command("ls", ["-A", self.options.dest.as_str()])?;
-
-        let result = self
-            .backend
-            .run_command("test", ["-z", output.stdout.as_str()])?;
+        let output = backend.run_command("ls", ["-A", self.options.dest.as_str()])?;
+        let result = backend.run_command("test", ["-z", output.stdout.as_str()])?;
 
         if result.status.success() {
-            self.git_clone()?;
+            self.git_clone(backend)?;
         }
 
         Ok(())
     }
 }
 
-impl<B> Git<B>
-where
-    B: Backend,
-{
-    pub fn new(backend: B, options: GitOptions) -> Self {
-        Self { backend, options }
-    }
-
-    fn git_clone(&self) -> Result<()> {
+impl Git {
+    fn git_clone(&self, backend: impl Backend) -> Result<()> {
         let mut args = vec!["clone"];
 
         if self.options.recursive.unwrap_or(false) {
@@ -84,7 +56,7 @@ where
         args.push(self.options.repository.as_str());
         args.push(self.options.dest.as_str());
 
-        let output = self.backend.run_command("git", args)?;
+        let output = backend.run_command("git", args)?;
         if !output.status.success() {
             return Err(Error::ActionError(output.stderr));
         }

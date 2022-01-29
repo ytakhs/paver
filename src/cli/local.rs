@@ -1,4 +1,4 @@
-use crate::action::Storage;
+use crate::action::Action;
 use crate::backend::local::LocalBackend;
 use crate::builtins;
 use crate::error::Error;
@@ -24,9 +24,6 @@ impl Local {
     }
 
     pub fn run(&self) -> Result<()> {
-        let mut storage = Storage::new();
-        storage.store("git".to_string(), Box::new(builtins::git::GitBuilder {}));
-
         let mut tera = Tera::default();
         tera.add_template_file(self.filepath.as_str(), None)?;
 
@@ -45,12 +42,13 @@ impl Local {
                         .next()
                         .ok_or(Error::ActionError("step error".to_string()))?;
 
-                    if let Some(action_builder) = storage.fetch(&s.0) {
-                        let backend = LocalBackend {};
-                        let action = action_builder.build(backend, s.1)?;
+                    let action = match s.0.as_str() {
+                        "git" => builtins::git::Git::new(serde_yaml::from_value(s.1)?),
+                        _ => Err(Error::ActionError("".to_string()))?,
+                    };
 
-                        action.run()?;
-                    }
+                    let backend = LocalBackend {};
+                    action.run(backend)?;
                 }
             }
         }
