@@ -18,13 +18,17 @@ pub struct GitOptions {
     branch: Option<String>,
 }
 
-impl Action for Git {
-    type Options = GitOptions;
+impl TryFrom<serde_yaml::Value> for Git {
+    type Error = crate::error::Error;
 
-    fn new(options: GitOptions) -> Self {
-        Self { options }
+    fn try_from(value: serde_yaml::Value) -> Result<Git> {
+        let options = serde_yaml::from_value(value)?;
+
+        Ok(Git { options })
     }
+}
 
+impl Action for Git {
     fn run(&self, backend: impl Backend) -> Result<()> {
         backend.check_commands_available(&["git"])?;
 

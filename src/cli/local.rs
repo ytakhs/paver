@@ -43,7 +43,7 @@ impl Local {
                         .ok_or(Error::ActionError("step error".to_string()))?;
 
                     let action = match s.0.as_str() {
-                        "git" => builtins::git::Git::new(serde_yaml::from_value(s.1)?),
+                        "git" => builtins::git::Git::try_from(s.1)?,
                         _ => Err(Error::ActionError("".to_string()))?,
                     };
 
