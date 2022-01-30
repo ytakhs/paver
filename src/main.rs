@@ -3,6 +3,7 @@ mod backend;
 mod builtins;
 mod cli;
 mod error;
+mod template;
 
 use cli::run_command;
 
